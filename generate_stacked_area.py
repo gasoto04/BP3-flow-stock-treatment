@@ -11,7 +11,7 @@ agg = df.groupby(['keyword', 'year'])['count'].sum().reset_index()
 
 # Define groups
 flow_keywords = ['debt rescheduling', 'debt reprofiling', 'maturity extension']
-stock_keywords = ['debt restructuring', 'debt reduction', 'debt relief', 'HIPC', 'debt forgiveness', 'haircut']
+stock_keywords = ['debt restructuring', 'debt reduction', 'debt forgiveness', 'haircut']
 
 # Filter to period up to 2004
 agg = agg[agg['year'] <= 2004]
@@ -23,7 +23,10 @@ def build_pivot(keywords):
     sub = agg[agg['keyword'].isin(keywords)]
     piv = sub.pivot_table(index='year', columns='keyword', values='count', fill_value=0)
     piv = piv.reindex(all_years, fill_value=0)
-    # Reorder columns to match the keyword list order (only existing ones)
+    # Ensure all keywords appear as columns (even if 0 data)
+    for k in keywords:
+        if k not in piv.columns:
+            piv[k] = 0
     cols = [k for k in keywords if k in piv.columns]
     return piv[cols]
 
